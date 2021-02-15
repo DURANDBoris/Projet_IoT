@@ -2,6 +2,9 @@
 #   DURAND Boris
 #
 #   Fichier du programme pour l'arduino
+#
+#   Le programme permettra la l'affichage des données sur un écran tous en enregistrant 
+#   les données sur une sd et les transmettra à une passerelle (raspberry)
 */
 
 //Bibliotéque incluse
@@ -9,7 +12,7 @@
 #include <Wire.h>
 #include "rgb_lcd.h"
 
-//Définition
+//Définition : on défini la partie b avec la partie a exemple(#define a b;)
 #define HIH_4030_OUT A0;
 #define HIH_4030_TENSION 5;
 #define TMP36_OUT A1;
@@ -17,9 +20,10 @@
 //Déclaration du capteur HIH_4030
 HIH_4030 sensorSpecs(HIH_4030_OUT, HIH_4030_TENSION);
 
-//Couleur de l'écran LCD
+//Déclaration de l'écran LCD
 rgb_lcd lcd;
 
+// RGB de l'écran
 struct RGB_LCD
 {
     const int RED = 255;
@@ -35,7 +39,7 @@ struct SE_DONNEE
     unsigned long long Time_unix;
 };
 
-
+//Initialisation de l'arduino
 void setup()
 {
     lcd.begin(20,4);
@@ -43,6 +47,7 @@ void setup()
     delay(1000);
 }
 
+//fonction d'affichage des données sur le LCD
 void printData(HIH_4030 sensor, float temperature, unsigned long long time_unix)
 {
     lcd.setCursor(0,0);
@@ -57,6 +62,7 @@ void printData(HIH_4030 sensor, float temperature, unsigned long long time_unix)
     lcd.print(" %");
 }
 
+//Boucle de la fonction à boucle infini
 void loop()
 {
     printData(sensorSpecs, SE_DONNEE::Temperature, SE_DONNEE::Time_linux);
