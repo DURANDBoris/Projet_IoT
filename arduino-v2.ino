@@ -13,58 +13,93 @@
 #include "rgb_lcd.h"
 
 //Définition : on défini la partie b avec la partie a exemple(#define a b;)
-#define HIH_4030_OUT A0;
-#define HIH_4030_TENSION 5;
-#define TMP36_OUT A1;
+#define HIH_4030_OUT A0
+#define HIH_4030_TENSION 5
+#define TMP36_OUT A1
+#define BOUTTON_ECRAN_MENU 8
 
 //Déclaration du capteur HIH_4030
-HIH_4030 sensorSpecs(HIH_4030_OUT, HIH_4030_TENSION);
+HIH4030 sensorSpecs(HIH_4030_OUT, HIH_4030_TENSION);
 
 //Déclaration de l'écran LCD
 rgb_lcd lcd;
 
 // RGB de l'écran
-struct RGB_LCD
-{
-    const int RED = 255;
-    const int GREEN = 0;
-    const int BLUE = 0;
-};
+const int           colorR = 255;
+const int           colorG = 0;
+const int           colorB = 0;
 
-//Structure des données
-struct SE_DONNEE
-{
-    float Temperature;
-    float Humidite;
-    unsigned long long Time_unix;
-};
+//Choix du menu écran
+int choix_ecran_menu = 1;
+//Données Relevées
+float               Temperature;
+float               Humidite;
+unsigned long long  Time_unix;
 
 //Initialisation de l'arduino
 void setup()
 {
-    lcd.begin(20,4);
-    lcd.setRGB(RGB_LCD::RED, RGB_LCD::GREEN, RGB_LCD::BLUE);
+    lcd.begin(16,2);
+    pinMode(BOUTTON_ECRAN_MENU, INPUT);
+    digitalRead(BOUTTON_ECRAN_MENU);
     delay(1000);
 }
 
 //fonction d'affichage des données sur le LCD
-void printData(HIH_4030 sensor, float temperature, unsigned long long time_unix)
+void afficher_temperature(float temperature)
 {
+    /*lcd.setCursor(0,0);
+    lcd.print(time_unix);*/
+    lcd.setRGB(colorR, colorG, colorB);
     lcd.setCursor(0,0);
-    lcd.print(time_unix);
+    lcd.print("Temperature : ");
     lcd.setCursor(0,1);
-    lcd.print("Température : ");
     lcd.print(temperature);
-    lcd.print(" °C")
-    lcd.setCursor(0,2);
-    lcd.print("Humidité : ");
-    lcd.print(sensor getSensorRH());
+    lcd.print(" C");
+}
+
+void afficher_humidite(HIH4030 sensor, float temperature)
+{
+    lcd.setRGB(colorR, 255, colorB);
+    lcd.setCursor(0,0);
+    lcd.print("Humidite :       ");
+    lcd.setCursor(0,1);
+    lcd.print(sensor.getTrueRH(temperature));
     lcd.print(" %");
+}
+
+void afficher_date()
+{
+    lcd.setRGB(colorR, colorG, 255);
+    lcd.setCursor(0,0);
+    lcd.print("Hello world !");
+    lcd.setCursor(0,1);
+    lcd.print("                ");
 }
 
 //Boucle de la fonction à boucle infini
 void loop()
 {
-    printData(sensorSpecs, SE_DONNEE::Temperature, SE_DONNEE::Time_linux);
-    delay(100);
+    Temperature = (analogRead(TMP36_OUT)* (5000 / 1024.0)-500)/10;
+    if (digitalRead(BOUTTON_ECRAN_MENU)==HIGH)//test si bouton appuyé
+    {
+      if(choix_ecran_menu > 3)
+      {
+        choix_ecran_menu = 0;
+      }
+      choix_ecran_menu++;
+    }
+    switch(choix_ecran_menu)
+    {
+      case 1 :
+        afficher_temperature(Temperature);
+        break;
+      case 2 :
+        afficher_humidite(sensorSpecs, Temperature);
+        break;
+      case 3 :
+        afficher_date();
+        break;
+    }
+    delay(1000);
 }
