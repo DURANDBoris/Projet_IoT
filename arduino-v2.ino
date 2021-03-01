@@ -56,7 +56,7 @@
  
 
 //Choix du menu écran
-int choix_ecran_menu = 0;
+int choix_ecran_menu = 1;
 
  
 
@@ -123,32 +123,38 @@ int choix_ecran_menu = 0;
   }
 
  
+//fonction menu d'affichage de l'écran lcd automatique
+  void menu_affichage()
+  {  
+    if(choix_ecran_menu > 3)
+    {
+      choix_ecran_menu = 1;
+    }
+    switch(choix_ecran_menu)
+    {
+      case 1 :
+        afficher_temperature(Temperature);
+        break;
+      case 2 :
+        afficher_humidite(sensorSpecs, Temperature);
+        break;
+      case 3 :
+        afficher_date();
+        break;
+    }
+    choix_ecran_menu++;
+  }
+
+
 
 //Boucle de la fonction à boucle infini
   void loop()
   {
-      Temperature = (analogRead(TMP36_OUT)* (5000 / 1024.0)-500)/10;
+    Temperature = (analogRead(TMP36_OUT)* (5000 / 1024.0)-500)/10;
   
-      //affichage lcd menu automatique
-        choix_ecran_menu++;
-        
-        if(choix_ecran_menu > 3)
-        {
-          choix_ecran_menu = 0;
-        }
-        
-        switch(choix_ecran_menu)
-        {
-          case 1 :
-            afficher_temperature(Temperature);
-            break;
-          case 2 :
-            afficher_humidite(sensorSpecs, Temperature);
-            break;
-          case 3 :
-            afficher_date();
-            break;
-        }
+    //affichage lcd menu automatique
+      menu_affichage();
+
     //un délai de 5 secondes à été mis
       delay(5000);
   }
